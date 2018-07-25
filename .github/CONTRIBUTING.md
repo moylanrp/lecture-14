@@ -20,7 +20,7 @@ to outside content), are all welcome. Please open an issue describing your
 suggestion.
 
 ## Before Opening an Issue
-Before opening a new issue, be sure to [search issues and pull requests](https://github.com/slu-soc5050/lecture-14/issues)
+Before opening a new issue, be sure to [search issues and pull requests](https://github.com/slu-soc5050/lecture-01/issues)
 to make sure the bug or typo hasn't been reported and/or already fixed.
 Similarly, search to make sure someone has not already made a suggestion. If
 there is a suggestion and you want to express support for it, please comment
