@@ -1,7 +1,7 @@
 lecture-14 <img src="https://slu-soc5050.github.io/images/logo.png" align="right" />
 ===========================================================
 [![](https://img.shields.io/badge/semester-fall%202018-orange.svg)](https://github.com/slu-soc5050/lecture-14)
-[![](https://img.shields.io/badge/release-draft-red.svg)](https://github.com/slu-soc5050/lecture-14)
+[![](https://img.shields.io/badge/release-lecture-orange.svg)](https://github.com/slu-soc5050/lecture-14)
 [![](https://img.shields.io/github/release/slu-soc5050/lecture-04.svg?label=version)](https://github.com/slu-soc5050/lecture-14/releases)
 [![](https://img.shields.io/github/last-commit/slu-soc5050/lecture-14.svg)](https://github.com/slu-soc5050/lecture-14/commits/master)
 [![](https://img.shields.io/github/repo-size/slu-soc5050/lecture-14.svg)](https://github.com/slu-soc5050/lecture-14)
@@ -13,7 +13,10 @@ This is the repository for Lecture 14 of the Saint Louis University course SOC 4
 ### Lecture Objectives
 At the end of this lecture and its corresponding assignments, students should be able to:
 
-1.
+1. Evalute an OLS regression model in terms of its statisfaction of OLS assumptions and its model fit.
+2. Revise an OLS model in response to concerns raised during assumption and model fit checks.
+3. Compare an original model to a revised model for the purposes of determining which model provides better estimates of variation in the given dependent variable.
+4. Assess an OLS model using effect sizes.
 
 ### Lecture Resources
 
