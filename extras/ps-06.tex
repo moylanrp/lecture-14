@@ -1,0 +1,114 @@
+\documentclass{tufte-handout}
+
+\usepackage{xcolor}
+
+% set image attributes:
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+% set hyperlink attributes
+\hypersetup{colorlinks}
+
+% create environment for bottom paragraph:
+\newenvironment{bottompar}{\par\vspace*{\fill}}{\clearpage}
+
+\usepackage{enumerate}
+
+% set table attributes
+\usepackage{tabu}
+\usepackage{booktabs}
+
+% ============================================================
+
+% define the title
+\title{SOC 4015/5050: PS-06 - Multivariate Regression}
+\author{Christopher Prener, Ph.D.}
+\date{Fall 2018}
+
+% ============================================================
+
+\begin{document}
+
+% ============================================================
+
+\maketitle % generates the title
+
+% ============================================================
+
+\vspace{5mm}
+\section{Directions}
+Please complete all steps below. All work should be uploaded to your GitHub assignment repository by 4:15pm on Monday, November 3\textsuperscript{rd}, 2018. All data can be obtained from the \texttt{testDriveR} package's \texttt{gss14} data set.
+
+\vspace{5mm}
+\section{Analysis Development}
+Using RStudio and your operating system's file manager, create an R Project in the \textit{existing} directory in your assignments repository named \texttt{PS-06}. Add a \texttt{README.md} file, notebook, and all necessary folders before beginning.\sidenote{This initial section follows the project workflow that is available in the \texttt{lecture-03} repo!}
+
+\vspace{5mm}
+\section{Part 1: Data Preparation}
+\begin{enumerate}
+\item Using the data table \texttt{gss14} in the \texttt{testDriveR} package, create a new data frame that has \textit{only} the following data:
+\begin{verbatim}
+> gssClean
+# A tibble: 2,538 x 8
+      id hrsWork white black otherRace female fullTime incomeCat
+   <int>   <int> <lgl> <lgl> <lgl>     <lgl>  <lgl>        <dbl>
+ 1     1      60 TRUE  FALSE FALSE     FALSE  TRUE            21
+ 2     2      40 TRUE  FALSE FALSE     TRUE   TRUE            25
+ 3     3      NA TRUE  FALSE FALSE     FALSE  FALSE           18
+ 4     4      20 TRUE  FALSE FALSE     TRUE   FALSE           25
+ 5     5      NA TRUE  FALSE FALSE     TRUE   FALSE           NA
+ 6     6      60 TRUE  FALSE FALSE     TRUE   TRUE            25
+ 7     7      NA TRUE  FALSE FALSE     FALSE  NA              NA
+ 8     8      40 TRUE  FALSE FALSE     FALSE  TRUE            21
+ 9     9      NA TRUE  FALSE FALSE     TRUE   FALSE           11
+10    10      55 FALSE FALSE TRUE      TRUE   TRUE            22
+# ... with 2,528 more rows
+\end{verbatim}
+
+Store these cleaned data in your \texttt{data/} sub-directory as a \texttt{.csv} file.
+\end{enumerate}
+
+\vspace{5mm}
+\section{Part 2: Descriptive Statistics and Assumptions}
+Using the GSS data created above in Part 1, answer the following questions. 
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item Report the \textit{appropriate} descriptive statistics for \textit{all} of the variables displayed in the output included with Part 1. Also create a formatted descriptive statistics table to include with your assignment submission. Store the output in your \texttt{results/} sub-directory.\sidenote{This output should be left as a \texttt{.html} file - it does not need to be reformatted into Microsoft Word.}
+\item Conduct a full set of normality tests on the variables \texttt{hrsWork} and \texttt{incomeCat} and report your findings.\sidenote{For the purposes of this assignment, we are going to treat \texttt{incomeCat} as a continuous variable.}
+\item Create a correlation table to identify any possible issues with regression assumptions.
+\item Summarize your assessment of how these data meet the assumptions of linear regression.
+\end{enumerate}
+
+\vspace{5mm}
+\section{Part 3: Model}
+Using the GSS data created above in Part 1, answer the following questions.
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item Construct a hypothesis and null hypothesis for the relationship between number of hours worked (\texttt{hoursWork}) and income (\texttt{incomeCat}), accounting for the other factors included in your data set.
+\item Construct a dissemination ready plot of the relationship between hours worked (\texttt{hoursWork}) and income (\texttt{incomeCat}). 
+\item Construct a regression equation modeling how income, accounting for race, gender, and whether or not someone works full time, affects \texttt{hoursWork} using \LaTeX{}\ syntax. 
+\item Execute a main effects model (model 1) of the effect of income on hours worked (\texttt{hoursWork}) (\texttt{incomeCat}).
+\item Execute a full model  (model 2) with all of your control variables.
+\item Provide a written summary of the findings of both of your models, including interpretations of the betas and appropriate measures of model fit.
+\end{enumerate}
+
+\vspace{5mm}
+\section{Part 4: Post-Hoc Assumptions Checks}
+Using the GSS data created above in Part 1, answer the following questions.
+\begin{enumerate}
+\setcounter{enumi}{13}
+\item Using the skills covered in Lecture 14, \textit{fully} check the assumptions and model fit of your second model.
+\item Provide a written summary of the findings of your assumption checks.
+\end{enumerate}
+
+\vspace{5mm}
+\section{Part 5: Final Model}
+Using the GSS data created above in Part 1, answer the following questions.
+\begin{enumerate}
+\setcounter{enumi}{15}
+\item Fit another model (model 3) that properly accounts for any issues discovered in Part 4. 
+\item Provide a written summary of how re-fitting the model has changed its conclusions. Is model 2 or model 3 a better model overall?
+\end{enumerate}
+
+% ============================================================
+\end{document}

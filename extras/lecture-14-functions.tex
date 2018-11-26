@@ -1,0 +1,162 @@
+\documentclass{tufte-handout}
+
+\usepackage{xcolor}
+
+% set hyperlink attributes
+\hypersetup{colorlinks}
+
+% set image attributes:
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+% indent subsections
+\newenvironment{subs}
+  {\adjustwidth{3em}{0pt}}
+  {\endadjustwidth}
+
+% ============================================================
+
+% define the title
+\title{SOC 4015/5050: Lecture 14 Functions}
+\author{Christopher Prener, Ph.D.}
+\date{Fall 2018}
+% ============================================================
+\begin{document}
+% ============================================================
+\maketitle % generates the title
+% ============================================================
+
+\vspace{5mm}
+\section{Packages}
+\begin{itemize}
+\item \texttt{base}
+\item \texttt{car}
+\item \texttt{heplots}
+\item \texttt{graphics}
+\item \texttt{lmtest}
+\item \texttt{sandwich}
+\item \texttt{stargazer}
+\item \texttt{stats}
+\item \texttt{tidyverse}
+\begin{itemize}
+\item \texttt{dplyr}
+\item \texttt{tibble}
+\end{itemize}
+\end{itemize}
+
+\vspace{5mm}
+\section{Utility Functions}
+\begin{subs}
+\subsection{Printing Row Numbers}
+\noindent \texttt{base::}{\color{red}\texttt{which}}\texttt{(\textit{x})}
+
+\vspace{3mm}
+\subsection{Matching Values}
+\noindent \texttt{base::}{\color{red}\texttt{\%in\%}}
+
+\vspace{3mm}
+\subsection{Creating ID Numbers}
+\noindent \texttt{tibble::}{\color{red}\texttt{row\_to\_column}}\texttt{(\textit{varName})}
+
+\vspace{3mm}
+\subsection{Listing All Variable Names}
+\noindent \texttt{dplyr::}{\color{red}\texttt{everything}}\texttt{()}
+
+\vspace{3mm}
+\subsection{Accessing Row Numbers}
+\noindent \texttt{dplyr::}{\color{red}\texttt{row\_number}}\texttt{()}
+
+\vspace{3mm}
+\subsection{Printing Problematic Observations}
+\begin{verbatim}
+printObs <- function(.data, values){
+  
+  .data %>%
+    filter(row_number() %in% values) %>%
+    select(id, varlist)
+  
+}
+\end{verbatim}
+\end{subs}
+
+\vspace{5mm}
+\section{Base \texttt{R} Graphics}
+\begin{subs}
+\subsection{Basic Plot}
+\noindent \texttt{graphics::}{\color{red}\texttt{plot}}\texttt{(\textit{object})}
+
+\vspace{3mm}
+\subsection{Horizontal Line on Plot}
+\noindent \texttt{graphics::}{\color{red}\texttt{abline}}\texttt{(h = \textit{val}, col = "\textit{color}", lty = \textit{val})}\sidenote{The \texttt{lty} argument accepts values for different line patterns.}
+\end{subs}
+
+\vspace{5mm}
+\section{Non-Linearity}
+\begin{subs}
+\subsection{Matrix of Component Residual Plots}
+\noindent \texttt{car::}{\color{red}\texttt{crPlots}}\texttt{(\textit{model})}
+
+\vspace{3mm}
+\subsection{Single Component Residual Plot}
+\noindent \texttt{car::}{\color{red}\texttt{crPlot}}\texttt{(\textit{model}, variable = "\textit{varName}")}
+\end{subs}
+
+\vspace{5mm}
+\section{Unusual Observations}
+\begin{subs}
+\subsection{Bonferonni Outlier Test}
+\noindent \texttt{car::}{\color{red}\texttt{outlierTest}}\texttt{(\textit{model})} 
+
+\vspace{3mm}
+\subsection{Leverage Points}
+\noindent \texttt{stats::}{\color{red}\texttt{hatvalues}}\texttt{(\textit{model})} 
+
+\vspace{3mm}
+\subsection{Cook's Distance}
+\noindent \texttt{stats::}{\color{red}\texttt{cooks.distance}}\texttt{(\textit{model})} 
+\end{subs}
+
+\vspace{5mm}
+\section{Normality of Residuals - Q-Q Plots}
+\noindent \texttt{car::}{\color{red}\texttt{qqPlot}}\texttt{(\textit{model})} 
+
+\vspace{5mm}
+\section{Homoskedastic Errors}
+\begin{subs}
+\subsection{Breusch-Pagan Test}
+\noindent \texttt{lmtest::}{\color{red}\texttt{bptest}}\texttt{(\textit{model})} 
+
+\vspace{3mm}
+\subsection{White's Test}
+\noindent \texttt{lmtest::}{\color{red}\texttt{bptest}}\texttt{(\textit{model}, \textasciitilde \textit{x1} $*$ \textit{x2} $+$ I(\textit{x1}\textasciicircum2) $+$ I(\textit{x2}\textasciicircum2),} 
+\par \texttt{data $=$ \textit{dataFrame})}
+
+\vspace{3mm}
+\section{Residual Plot}
+\noindent \texttt{graphics::}{\color{red}\texttt{plot}}\texttt{(\textit{model}, which $=$ 1)} 
+\end{subs}
+
+\vspace{5mm}
+\section{Auto-Correlation - Durbin-Watson Test}
+\noindent \texttt{car::}{\color{red}\texttt{durbinWatsonTest}}\texttt{(\textit{model})} 
+
+\vspace{5mm}
+\section{Multi-Collinearity - Variance Inflation Factor}
+\noindent \texttt{car::}{\color{red}\texttt{vif}}\texttt{(\textit{model})} 
+
+\newpage
+\section{``Robust'' Standard Errors}
+\begin{subs}
+\subsection{Covariance Matrix Estimate}
+\noindent \texttt{sandwich::}{\color{red}\texttt{vcovHC}}\texttt{(\textit{model}, "HC3")} 
+
+\vspace{3mm}
+\subsection{New Standard Errors and p-values}
+\noindent \texttt{lmtest::}{\color{red}\texttt{coeftest}}\texttt{(\textit{model}, vcov $=$ \textit{cme})} 
+\end{subs}
+
+\vspace{5mm}
+\section{Eta-Squared Effect Sizes}
+\noindent \texttt{heplots::}{\color{red}\texttt{etasq}}\texttt{(\textit{model}, partial $=$ FALSE)} 
+% ============================================================
+\end{document}

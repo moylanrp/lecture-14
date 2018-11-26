@@ -1,0 +1,83 @@
+\documentclass{tufte-handout}
+
+\usepackage{xcolor}
+
+% set image attributes:
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+% set hyperlink attributes
+\hypersetup{colorlinks}
+
+% create environment for bottom paragraph:
+\newenvironment{bottompar}{\par\vspace*{\fill}}{\clearpage}
+
+\usepackage{enumerate}
+
+% set table attributes
+\usepackage{tabu}
+\usepackage{booktabs}
+
+% ============================================================
+
+% define the title
+\title{SOC 4015/5050: Lab-13 - Regression Diagnostics}
+\author{Christopher Prener, Ph.D.}
+\date{Fall 2018}
+
+% ============================================================
+
+\begin{document}
+
+% ============================================================
+
+\maketitle % generates the title
+
+% ============================================================
+
+\vspace{5mm}
+\section{Directions}
+Please complete all steps below. All work should be uploaded to your GitHub assignment repository by 4:15pm on Monday, November 3\textsuperscript{rd}, 2018. All data can be obtained from the \texttt{testDriveR} package's \texttt{auto17} data set.
+
+\vspace{5mm}
+\section{Analysis Development}
+Using RStudio and your operating system's file manager, create an R Project in the \textit{existing} directory in your assignments repository named \texttt{Lab-13}. Add a \texttt{README.md} file, notebook, and all necessary folders before beginning.\sidenote{This initial section follows the project workflow that is available in the \texttt{lecture-03} repo!}
+
+\vspace{3mm}
+\section{Fit An Initial Model}
+\begin{enumerate}
+\item Execute a multivariate regression model that shows how \texttt{displ} affects \texttt{fuelCost} controlling for characteristics of the engine (\texttt{cyl} and \texttt{gears}) and highway fuel efficiency (\texttt{hwy}).
+\end{enumerate}
+
+\vspace{3mm}
+\section{Assess Model}
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item Check model for non-linearity in the relationship between \textit{x} variables and \textit{y}.
+\item Check the residuals for normality.
+\item Check the residuals for homoskedastic errors.
+\item Check the residuals for auto-correlation.
+\item Check the independent variables for multi-collinearity.
+\item Summarize your findings - do you have concerns about how the model is specified? Should variables be removed or added?
+\end{enumerate}
+
+\vspace{3mm}
+\section{Check for Unusual Observations}
+\begin{enumerate}
+\setcounter{enumi}{7}
+\item Check for outliers.
+\item Check for observations with high leverage values.
+\item Check for observations with high influence values.
+\item Summarize your findings - do you have concerns about unusual observations? Should observations be removed? If so, which ones?
+\end{enumerate}
+
+\vspace{3mm}
+\section{Re-Fit Model}
+\begin{enumerate}
+\setcounter{enumi}{11}
+\item Re-fit the model based on your findings from the previous two sections. 
+\item Compare your initial model and the newly re-fit model. How do the betas differ (if at all)? 
+\end{enumerate}
+
+% ============================================================
+\end{document}
