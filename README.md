@@ -2,7 +2,7 @@ lecture-14 <img src="https://slu-soc5050.github.io/images/logo.png" align="right
 ===========================================================
 [![](https://img.shields.io/badge/semester-fall%202018-orange.svg)](https://github.com/slu-soc5050/lecture-14)
 [![](https://img.shields.io/badge/release-lecture-orange.svg)](https://github.com/slu-soc5050/lecture-14)
-[![](https://img.shields.io/github/release/slu-soc5050/lecture-04.svg?label=version)](https://github.com/slu-soc5050/lecture-14/releases)
+[![](https://img.shields.io/github/release/slu-soc5050/lecture-14.svg?label=version)](https://github.com/slu-soc5050/lecture-14/releases)
 [![](https://img.shields.io/github/last-commit/slu-soc5050/lecture-14.svg)](https://github.com/slu-soc5050/lecture-14/commits/master)
 [![](https://img.shields.io/github/repo-size/slu-soc5050/lecture-14.svg)](https://github.com/slu-soc5050/lecture-14)
 [![Travis-CI Build Status](https://travis-ci.org/slu-soc5050/lecture-14.svg?branch=master)](https://travis-ci.org/slu-soc5050/lecture-14)
