@@ -1,0 +1,360 @@
+---
+title: "Lab-13 Replication"
+author: "Christopher Prener, Ph.D."
+date: '(`r format(Sys.time(), "%B %d, %Y")`)'
+output: 
+  github_document: default
+  html_notebook: default 
+---
+
+## Introduction
+This notebook replicates Lab-13.
+
+## Dependencies
+This notebook requires a variety of packages for assessing regression models and cleaning data:
+
+```{r load-packages}
+# tidyverse packages
+library(dplyr)      # data wrangling
+library(ggplot2)    # data plotting
+library(tibble)     # data wrangling
+
+# statistics packages
+library(car)        # regression diagnostics
+library(heplots)    # effect sizes
+library(lmtest)     # white's test
+library(sandwich)   # robust standard errors
+library(skimr)      # descriptive statistics
+
+# other packages
+library(here)       # file path management
+library(stargazer)  # regression output
+library(testDriveR) # data
+```
+
+To simplfy printing output, we're going to use the same `printObs` function from the lecture:
+
+```{r}
+printObs <- function(.data, values){
+  
+  .data %>%
+    filter(row_number() %in% values) %>%
+    select(id, mfrDivision, carLine, fuelCost, displ, cyl, gears, hwyFE)
+  
+}
+```
+
+## Load Data
+This notebook requires data from the `testDriveR` package
+
+```{r load-data}
+autoData <- auto17
+```
+
+## Part 1
+### Question 1
+First, we need to fit an initial model to assess.
+
+```{r p1-q1}
+model1 <- lm(fuelCost ~ displ+cyl+gears+hwyFE, data = autoData)
+summary(model1)
+```
+
+All four of our predictors contribue to explaining variation in fuel cost. As displacement grows, fuel cost seems to go down, which doesn't fit my priors about engine size and fuel costs. I want to dig into this quickly before we move on:
+
+```{r}
+modelDispl <- lm(fuelCost ~ displ, data = autoData)
+summary(modelDispl)
+```
+
+As I would have hypothesized, displacement is *positively* associated with engine size. There is a sign change between this model and model 1 - a sign of Simpson's Paradox! For a "real" project, this would warrent further exploration.
+
+## Part 2
+### Question 2
+First, we'll check for non-linearity using `crPlots()`:
+
+This is the plot for our model:
+
+```{r cr-plots, warning=FALSE}
+crPlots(model1)
+```
+
+Note how I used `warning=FALSE` in the code chunk options to supress that information so that the plots fit in the notebook. In those plots, I do not see any serious departures from linear relationships here.
+
+### Question 3
+Our model's residuals should be normally distributed. The `car` package contains a special `qqPlot` function for assessing this, which includes additional lines on the plot for assessing deviations from normality:
+
+```{r residual-normality}
+qqplot <- qqPlot(model1)
+```
+
+We've got some clear signs of non-normal residuals, which is a violation of the regression assumptions. We'll also note the outliers identified here:
+
+```{r residual-normality-obs}
+printObs(autoData, qqplot)
+```
+
+### Question 4
+Since the residuals are not normally distributed, then we want to use the White's Test variant of the Breusch-Pagan Test.
+
+```{r whites-test}
+bptest(model1, ~ displ * cyl * gears * hwyFE + I(displ^2) + I(cyl^2) + I(gears^2) + I(hwyFE^2), data = autoData)
+```
+
+The statistically significant result for the White's Test suggests that we have signs of homoskedastic errors, which is another violation of the regression assumptions. We can visualize this with a residual plot:
+
+```{r residual-plot}
+plot(model1, which = 1)
+```
+
+There is clear narrowing on the left side of the plot, suggesting homoskedastic errors are present.
+
+```{r residual-plot-obs}
+homoskedastic <- c(311, 1158, 814)
+
+printObs(autoData, homoskedastic)
+```
+
+### Question 5
+The Durbin-Watson Test identifies the presence of auto-correlation in our model - the residuals are correlated with each other:
+
+```{r durbin-watson}
+durbinWatsonTest(model1)
+```
+
+This suggests that auto-correlation is present in our model, yet another violation of the regression assumptions.
+
+### Question 6
+We use the square root of the variance inflation factor ("VIF") to identify multi-collinearity. Individual values should be less than 10:
+
+```{r vif}
+sqrt(vif(model1))
+```
+
+This measure indicates that multi-collinearity is not a significant concern. We also want our mean VIF to be less than 1:
+
+```{r mean-vif}
+mean(sqrt(vif(model1)))
+```
+
+This indicates that there is some minimal concern that our average level of multicollinearity is high but not problematically so. We could look for alternative model specifications if this were a more significant concern (by either creating scales or by changing the specific independent variables used).
+
+### Question 7
+We violate a number of regression assumptions for normal residuals, heteroskedastic errors, and auto-correlation. We should consider re-fitting the model with additional predictors. Alternatively or in addition, we should re-fit our model using robust standard errors.
+
+## Part 3
+### Question 8
+The Bonferonni test will identify outliers by observation. The `outlierTest()` output will show statistically significant observations, each of which is considered an outlier:
+
+```{r bonferonni-test}
+outlierTest(model1)
+```
+
+We've found three potential outliers among our 1,216 observations. We can learn more about these observations by extracting the row numbers from the output and then using our `printObs()` function:
+
+```{r bonferonni-obs}
+bonferonni <- outlierTest(model1)
+bonferonni <- as.numeric(attr(bonferonni$p, "names"))
+
+printObs(autoData, bonferonni)
+```
+
+This gives us our first list of potentially problematic observations. Comparing their values with descriptive statistics would give us a sense of why these are considered outliers:
+
+```{r}
+autoData %>%
+  select(fuelCost, displ, cyl, gears, hwyFE) %>%
+  skim()
+```
+
+We've got several very high cost vehicles near the bottom of the `hwyFE` distribution and relatively high values for `cyl` and `gears`.
+
+### Question 4
+To calculate leverage, we'll use the equation:
+
+$\frac{2*p}{n}$
+
+We can calculate $p$ (the number of parameters) and $n$ (the number of observations in the model) automatically using the syntax below - we need to pull information from the `model1` object. 
+
+```{r leverage2}
+p <- as.numeric(length(attr(model1$coefficients, "names")))
+n <- as.numeric(nrow(model1$model))
+
+leveragePoints2 <- which(hatvalues(model1) > (2*p)/n)
+
+printObs(autoData, leveragePoints2)
+```
+
+This is a high number of observations - lets look at the x3 leverage values before making a decision on how to proceed. We can calculate this more conservative measure of leverage using the following equation:
+
+$\frac{3*p}{n}$
+
+We'll use the same values for $p$ and $n$ we've stored earlier:
+
+```{r leaverage3}
+leveragePoints3 <- which(hatvalues(model1) > (3*p)/n)
+
+printObs(autoData, leveragePoints3)
+```
+
+This is still a large proportion of the sample - we can't take out all of these observations without impacting our ability to generalize from this sample. What to do? First, we'll see if our three outliers appear:
+
+```{r}
+bonferonni %in% leveragePoints3
+```
+
+This indicates that both 21311 and 21365 (the first and second observations in `bonferonni`) are also high leverage observations. These will be candidates for removal. With so many high leverage observations, we also might think about whether we're using the right mix of variables to estimate our models.
+
+### Question 10
+Cook's distance is an alternative measure of influence. We are particularly concerned about observations that have a value for Cook's distance greater than 1:
+
+```{r cooks-d-1}
+cooksD1 <- which(cooks.distance(model1) > 1)
+
+printObs(autoData, cooksD1)
+```
+
+The `0 rows` output means that there are no observations that meet this criteria. 
+
+We should also be concerned about observations that have a Cook's distance greater than .5:
+
+```{r cooks-d-half}
+cooksDHalf <- which(cooks.distance(model1) > .5)
+
+printObs(autoData, cooksDHalf)
+```
+
+Again, there are no observations that meet this criteria.
+
+We can visual the Cook's distance values with the following syntax:
+
+```{r cooks-d-plot}
+plot(cooks.distance(model1))
+abline(h = c(1, .5), col="red", lty=2)
+```
+
+We don't see either of our red lines because none of the observations meet the criteria of being greater than .5 or 1. We should, however, note observations that do not cross this threshold but are outliers relative to the other observations in the data set. There are a number of points that stand out, and we can identify them by setting our value for Cook's distance based on the y axis of the plot:
+
+```{r cooks-d-borderline}
+cooksDBorderline <- which(cooks.distance(model1) > .03)
+
+printObs(autoData, cooksDBorderline)
+```
+
+This gives us a small number of potentially influential observations that is much more reasonable to manage than the lerverage output. We'll do another quick check to see which vehicles keep showing up:
+
+```{r}
+bonferonni %in% cooksDBorderline
+```
+
+As with leverage, the first two observations identified by Bonferonni are possible outliers.
+
+The influence plot combines measures of Cook's Distance and "studentized resiudals" (residuals converted to $t$ values) and notes particularly extreme observations:
+
+```{r influence-plot}
+influence <- influencePlot(model1)
+```
+
+The plot shows us the comparison of our estimated values with the studentized resiudals. Sometimes the output is difficult to read, however, so it is easier to store the row numbers and print the corresponding observations:
+
+```{r influence-obs}
+influenceObs <- as.integer(row.names(influence))
+
+printObs(autoData, influenceObs)
+```
+
+We'll see what the overlap is with Cook's D:
+
+```{r influence-cooksD}
+influenceObs %in% cooksDBorderline
+```
+
+We've got some overlap with the Cook's D here, giving us more assurance we're identifying the vehicles that have the highest degree of influence on the model. As a final assurance, we can check and see if these Cook's D and Influence observations overlap with leverage:
+
+```{r}
+cooksDBorderline %in% leveragePoints3
+influenceObs %in% leveragePoints3
+```
+
+All of these observations also appear to have x3 leverage.
+
+### Question 11
+We've identified quite a few observations with potential high impact on our model. We cannot remove all of them without sacrificing a high proportion of our sample, so we'll remove only the worst offenders. This needs to be noted in the limitations section of our final write-up or presentation. To quickly get a list of unique ids, I'll write down all of the problematic ones and then use the `base::unique()` function to generate a vector of only the unique observations:
+
+```{r}
+problemObs <- unique(c(21311, 21365, 21018, 20913, 19960, 21386, 
+                       21294, 21365, 20706, 21018, 21294, 21365, 20503, 21018))
+```
+
+We'll also check to see if the individual points identified in the `qqplot` and homoskedastic error tests are present in this list. We noted the following problematic observations: Non-Normal - 21365, 21018; Residuals - 21311, 21365, 21018.
+
+```{r}
+resid <- c(21311, 21365, 21018.)
+
+resid %in% problemObs
+```
+
+Our initial list of `problemObs` therefore covers all of the major points we've identified.
+
+## Part 4
+### Question 12
+First, we want to create a subset of our data that does not include potentially problematic observations. We'll alsos tore the AIC and BIC values for Model 1 so we can compare them to Model 2:
+
+```{r fit-model-subset}
+autoData %>%
+  mutate(insample = ifelse(id %in% problemObs, TRUE, FALSE)) %>%
+  filter(insample == FALSE) %>%
+  select(-insample) -> autoDataSub
+
+model2 <- lm(fuelCost ~ displ+cyl+gears+hwyFE, data = autoDataSub)
+
+aic1 <- round(AIC(model1), digits = 3)
+bic1 <- round(BIC(model1), digits = 3)
+aic2 <- round(AIC(model2), digits = 3)
+bic2 <- round(BIC(model2), digits = 3)
+```
+
+Now we're ready to create the table:
+
+```{r model-table, results=FALSE}
+stargazer(model1, model2,
+  title = "Regression Results",
+  add.lines = list(c("AIC", aic1, aic2),c("BIC", bic1, bic2)), 
+  omit.stat = "rsq", df = FALSE, 
+  type = "html", out = here("results", "models.html"))
+```
+
+We'll want to do follow-up on whether normality, homoskedasticity, and auto-correlation remain concerns in model 2. If there are any outstanding concerns, we'll want to fit our model using robust standard errors. We'll start with normality:
+
+```{r residual-normality-model2}
+qqPlot(model2)
+```
+
+This suggests we (a) still have concerns about our residuals' distribution and (b) should use the White's Test to follow-up on homoskedasticity:
+
+```{r whites-test-model2}
+bptest(model2, ~ displ * cyl * gears * hwyFE + I(displ^2) + I(cyl^2) + I(gears^2) + I(hwyFE^2), data = autoDataSub)
+```
+
+The results of the White's Test ($BP = 315.98, p < 0.001$) suggest that homoskedasticity remains a concern. Finally, we'll check on auto-correlation for the new model:
+
+```{r durbin-watson-model2}
+durbinWatsonTest(model2)
+```
+
+The results of the Durbin-Watson Test ($DW = 1.009, p < 0.001$) suggest that auto-correlation remains a concern. We should therefore fit our final model using robust standard errors.
+
+All of these signs suggest that robust standard errors are needed for our model. We would fit these for both Model 1 and Model 2 to ensure that we're making an apples-to-apples comparison of our results:
+
+```{r robust-se-model1}
+coeftest(model1, vcov = vcovHC(model2, "HC3"))
+```
+
+```{r robust-se-model2}
+coeftest(model2, vcov = vcovHC(model2, "HC3"))
+```
+
+These would need to be manually input into our table.
+
+### Question 12
+Our analysis suggests that model 2 offers some modest improvement on model 1. Our AIC and BIC, as well as root mean squared error values, all decrease. We see a corresponding increase (very slight) in our adjusted r-squared.
